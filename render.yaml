@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: leadconnector-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: API_KEY
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: WEBHOOK_URL
+        sync: false

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LeadConnector — formulário de demonstração</title>
+<style>
+  :root { --bg:#0d1117; --card:#161b22; --text:#e6edf3; --muted:#8b949e; --accent:#2f81f7; --ok:#3fb950; --err:#f85149; }
+  @media (prefers-color-scheme: light) { :root { --bg:#f6f8fa; --card:#fff; --text:#1f2328; --muted:#656d76; } }
+  * { box-sizing:border-box; } body { margin:0; font-family:system-ui,sans-serif; background:var(--bg); color:var(--text); }
+  main { max-width:520px; margin:0 auto; padding:48px 20px; }
+  h1 { margin:0 0 4px; } p.sub { color:var(--muted); margin:0 0 24px; }
+  form { background:var(--card); padding:24px; border-radius:14px; border:1px solid #8883; }
+  label { display:block; font-size:.85rem; color:var(--muted); margin:14px 0 4px; }
+  input, textarea { width:100%; padding:11px 13px; border-radius:9px; border:1px solid #8885; background:transparent; color:inherit; font:inherit; }
+  textarea { min-height:100px; resize:vertical; }
+  .hp { position:absolute; left:-9999px; }
+  .check { display:flex; gap:8px; align-items:flex-start; margin-top:14px; font-size:.85rem; color:var(--muted); }
+  .check input { width:auto; margin-top:3px; }
+  button { margin-top:18px; width:100%; padding:12px; border:0; border-radius:9px; background:var(--accent); color:#fff; font:inherit; font-weight:600; cursor:pointer; }
+  button:disabled { opacity:.6; } #msg { margin-top:14px; } .ok { color:var(--ok); } .err { color:var(--err); }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Fale com a gente</h1>
+  <p class="sub">Responderemos o mais rápido possível. · <a href="/admin.html">Abrir painel</a></p>
+  <form id="f">
+    <label for="name">Nome *</label><input id="name" name="name" required minlength="2" autocomplete="name">
+    <label for="email">E-mail *</label><input id="email" name="email" type="email" required autocomplete="email">
+    <label for="phone">Telefone / WhatsApp</label><input id="phone" name="phone" type="tel" autocomplete="tel">
+    <label for="message">Mensagem</label><textarea id="message" name="message"></textarea>
+    <!-- Honeypot: invisível para pessoas, robôs preenchem -->
+    <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <label class="check"><input type="checkbox" id="consent"> Concordo em ser contatado(a) sobre minha solicitação.</label>
+    <button id="btn">Enviar</button>
+    <div id="msg" role="status"></div>
+  </form>
+</main>
+<script>
+  // Em outro site, troque por a URL da sua API: const API = 'https://seu-app.onrender.com';
+  const API = '';
+  const f = document.getElementById('f'), msg = document.getElementById('msg'), btn = document.getElementById('btn');
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(f));
+    d.consent = document.getElementById('consent').checked;
+    btn.disabled = true; msg.textContent = '';
+    try {
+      const r = await fetch(API + '/api/leads', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(d) });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error);
+      msg.className = 'ok'; msg.textContent = '✅ ' + j.message; f.reset();
+    } catch (err) { msg.className = 'err'; msg.textContent = err.message; }
+    btn.disabled = false;
+  });
+</script>
+</body>
+</html>
